@@ -1,9 +1,9 @@
 section .data
     x dd 10 ; значение x
-    resultStr db 8, 0  ; выделение места для строки результата
 
 section .bss
     y resd 1 ; выделение места под результат y
+    utf8str db 4 ; выделение места для UTF-8 строки
 
 section .text
     global _start
@@ -11,33 +11,24 @@ section .text
 _start:
     mov eax, dword [x] ; загрузка x в регистр eax
     imul eax, eax, -2 ; умножение x на -2
-    mov ecx, 14  ; делитель 14
-    idiv ecx  ; деление на 14
+    mov ecx, 14 ; делитель 14
+    idiv ecx ; деление на 14
     mov [y], eax ; сохранение результата в y
 
-    ; преобразование результата в строку
+    ; запись результата в строку UTF-8
     mov eax, [y]
-    mov ebx, resultStr
-    add bx, 8
-convertLoop:
-    dec bx
-    xor edx, edx
-    mov ecx, 10
-    div ecx
-    add dl, '0'
-    mov [bx], dl
-    test eax, eax
-    jnz convertLoop
+    add eax, '0'
+    mov [utf8str], eax
 
-    ; вывод результата
-    mov eax, 4  ; системный вызов для вывода
-    mov ebx, 1  ; файловый дескриптор stdout
-    mov ecx, resultStr  ; адрес строки результата
-    mov edx, 8  ; количество байт для вывода
-    int 0x80  ; выполнение системного вызова
+    ; вывод результата в UTF-8
+    mov eax, 4 ; системный вызов для вывода
+    mov ebx, 1 ; файловый дескриптор stdout
+    mov ecx, utf8str ; адрес строки UTF-8
+    mov edx, 1 ; количество байт для вывода
+    int 0x80 ; выполнение системного вызова
 
     ; завершение программы
-    mov eax, 1  ; системный вызов для завершения программы
+    mov eax, 1 ; системный вызов для завершения программы
     xor ebx, ebx ; код ошибки 0
-    int 0x80  ; выполнение системного вызова
+    int 0x80 ; выполнение системного вызова
 
