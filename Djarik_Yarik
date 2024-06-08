@@ -1,5 +1,6 @@
 section .data
     x dd 10 ; значение x
+    resultStr db 8, 0  ; выделение места для строки результата
 
 section .bss
     y resd 1 ; выделение места под результат y
@@ -14,14 +15,29 @@ _start:
     idiv ecx  ; деление на 14
     mov [y], eax ; сохранение результата в y
 
+    ; преобразование результата в строку
+    mov eax, [y]
+    mov ebx, resultStr
+    add bx, 8
+convertLoop:
+    dec bx
+    xor edx, edx
+    mov ecx, 10
+    div ecx
+    add dl, '0'
+    mov [bx], dl
+    test eax, eax
+    jnz convertLoop
+
     ; вывод результата
     mov eax, 4  ; системный вызов для вывода
     mov ebx, 1  ; файловый дескриптор stdout
-    mov ecx, y  ; адрес переменной y
-    mov edx, 4  ; количество байт для вывода
+    mov ecx, resultStr  ; адрес строки результата
+    mov edx, 8  ; количество байт для вывода
     int 0x80  ; выполнение системного вызова
 
     ; завершение программы
     mov eax, 1  ; системный вызов для завершения программы
     xor ebx, ebx ; код ошибки 0
     int 0x80  ; выполнение системного вызова
+
