@@ -1,0 +1,25 @@
+.section .data
+result:
+    .asciz "-2x/14 = %d\n"
+.section .text
+.globl _start
+
+_start:
+    movl $10, %eax    # присвоим переменной x значение 10
+    movl $-2, %ebx    # загрузим -2 в регистр EBX
+    imull %eax, %ebx  # умножим x на -2
+    sarl $4, %ebx     # сдвинем результат на 4 бита вправо (деление на 14)
+    movl %ebx, %ecx   # помещаем результат в регистр ECX
+
+    # выводим результат на экран
+    movl $result, %edx
+    movl $1, %eax
+    movl $1, %ebx
+    movl %ecx, %esi
+    movl $4, %edi
+    int $0x80
+
+    # завершаем программу
+    movl $0, %eax
+    movl $0, %ebx
+    int $0x80
